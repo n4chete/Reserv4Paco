@@ -1,17 +1,25 @@
 from flask import Flask, request, render_template, jsonify
-from reserva_core import hacer_reserva
-import time
 import requests
+import threading
+
+from reserva_core import hacer_reserva  # Asegúrate de que este módulo esté presente
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 # 🧠 Sesión global para login anticipado
 session_guardada = None
 
+# ✅ Ruta principal
 @app.route('/')
 def home():
     return render_template('index.html')
 
+# ✅ Ruta dummy para probar conexión backend
+@app.route('/ping', methods=['POST'])
+def ping():
+    return "✅ Backend activo"
+
+# ✅ Ruta para login anticipado
 @app.route('/prelogin', methods=['POST'])
 def prelogin():
     global session_guardada
@@ -38,12 +46,19 @@ def prelogin():
     else:
         return jsonify({"status": "❌ Error de login"})
 
+# ✅ Ruta para lanzar reserva en segundo plano
+def ejecutar_reserva_en_segundo_plano(data, session):
+    try:
+        resultado = hacer_reserva(data, session)
+        print(f"[RESERVA] Resultado: {resultado}", flush=True)
+    except Exception as e:
+        print(f"[ERROR] Reserva fallida: {str(e)}", flush=True)
+
 @app.route('/run-script', methods=['POST'])
 def run_script():
     global session_guardada
     session = session_guardada or requests.Session()
 
-    # 🧩 Recogida de datos del formulario
     data = {
         "usuario": request.form.get("usuario"),
         "password": request.form.get("password"),
@@ -53,46 +68,16 @@ def run_script():
         "part2": request.form.get("part2", ""),
         "part3": request.form.get("part3", ""),
         "part4": request.form.get("part4", ""),
-        "deporte": request.form.get("deporte", "padel")  # ✅ nuevo campo para lógica condicional
+        "deporte": request.form.get("deporte", "padel")
     }
 
-    resultados = []
+    print("[DEBUG] Datos recibidos:", data, flush=True)
 
-    pistas_raw = request.form.get("pistas_multis", "").strip()
-    pistas_activadas = bool(pistas_raw)
+    hilo = threading.Thread(target=ejecutar_reserva_en_segundo_plano, args=(data, session))
+    hilo.start()
 
-    if pistas_activadas:
-        try:
-            intervalo = float(request.form.get("intervalo", 0))
-        except ValueError:
-            return "❌ Error en intervalo"
+    return "⏳ Reserva en curso…"
 
-        pistas = [p.strip() for p in pistas_raw.split(",") if p.strip().isdigit()]
-        if not pistas:
-            return "❌ No se han especificado pistas válidas"
-
-        for i, pista in enumerate(pistas):
-            data["pista"] = pista
-            resultado = hacer_reserva(data, session)
-            resultados.append(f"Pista {pista}: {resultado}")
-            if i < len(pistas) - 1:
-                print(f"[DEBUG] Esperando {intervalo} segundos...")
-                time.sleep(intervalo)
-
-    else:
-        try:
-            cantidad = int(request.form.get("cantidad", 1))
-            intervalo = float(request.form.get("intervalo", 0))
-        except ValueError:
-            return "❌ Error en cantidad o intervalo"
-
-        for i in range(cantidad):
-            resultado = hacer_reserva(data, session)
-            resultados.append(f"Reserva {i+1}: {resultado}")
-            if i < cantidad - 1:
-                time.sleep(intervalo)
-
-    return "\n".join(resultados)
-
-if __name__ == '__main__':
+# ✅ Ejecutar localmente si se desea
+if __name__ == "__main__":
     app.run(debug=True)
