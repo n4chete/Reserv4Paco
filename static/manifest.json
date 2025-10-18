@@ -1,0 +1,26 @@
+{
+  "name": "Reserv4",
+  "short_name": "Reserv4",
+  "start_url": "https://reserv4.onrender.com",
+  "display": "standalone",
+  "background_color": "#f4f4f4",
+  "theme_color": "#0077cc",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
+
+
+
+
+

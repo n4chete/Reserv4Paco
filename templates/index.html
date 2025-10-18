@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reserva Laietània</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/static/service-worker.js')
+        .then(() => console.log('Service Worker registrado'));
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 1rem;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #0077cc;
+      font-size: 3rem;
+    }
+
+    form {
+      max-width: 600px;
+      margin: 1rem auto;
+      background: white;
+      padding: 0.5rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    fieldset {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 1rem;
+    }
+
+    legend {
+      font-weight: bold;
+      color: #0077cc;
+      padding: 0 0.5rem;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .field-row label {
+      flex: 1;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+    }
+
+    input {
+      padding: 0.4rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.95rem;
+    }
+
+    .input-corto { width: 7ch; }
+    .input-medio { width: 15ch; }
+    .input-largo { width: 10ch; }
+    .input-mini { width: 3ch; }
+    .input-cinco { width: 5ch; }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    button {
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 2rem;
+      margin-top: 1rem;
+    }
+	button:disabled {
+		background-color: #ccc;
+		cursor: not-allowed;
+		opacity: 0.6;
+	}
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    #status {
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: bold;
+      white-space: pre-line;
+      font-size: 0.95rem;
+    }
+
+    .button-wrapper {
+      text-align: center;
+    }
+
+    #configEncadenado {
+      background-color: #eef;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    #configEncadenado .field-row {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+	.button-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 0rem;
+}
+
+.reloj-lateral {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #555;
+  margin: 0;
+}
+.boton-preparar {
+  font-size: 1rem;
+  padding: 0.4rem 0.8rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.boton-preparar:hover {
+  background-color: #005fa3;
+}
+
+  </style>
+</head>
+<body>
+  <h1>Reserv4</h1>
+  <form id="reservaForm">
+
+    <fieldset>
+      <legend>Datos de acceso</legend>
+      <div class="field-row">
+        <label>Usuario:
+          <div class="input-row">
+            <span>👤</span>
+            <input type="text" name="usuario" value="14386" required class="input-corto" maxlength="7">
+          </div>
+        </label>
+        <label>Contraseña:
+          <div class="input-row">
+            <span>🔒</span>
+            <input type="password" name="password" required class="input-corto" maxlength="7">
+          </div>
+        </label>
+		<label>Deporte:
+  <div class="input-row">
+    <span>🎾</span>
+    <select name="deporte" id="selectorDeporte" class="input-medio">
+      <option value="padel">Padel</option>
+      <option value="tenis">Tenis</option>
+    </select>
+  </div>
+</label>
+      </div>
+	  </fieldset>
+	  <fieldset>
+  <legend>Preparación automática</legend>
+  <div class="field-row">
+    <label>Hora de disparo:
+      <div class="input-row">
+        <span>⏱️</span>
+        <input type="time" id="horaDisparo" class="input-medio">
+      </div>
+    </label>
+    <label>
+      <div class="input-row">
+        <span>🔐</span>
+        <button type="button" id="prepararSesion" class="boton-preparar">Preparar</button>
+      </div>
+    </label>
+  </div>
+</fieldset>
+    <fieldset>
+      <legend>Datos de reserva</legend>
+      <div class="field-row">
+        <label>Fecha:
+          <div class="input-row">
+            <span>📅</span>
+            <input type="date" name="fecha" required class="input-medio" maxlength="15">
+          </div>
+        </label>
+        <label>Hora:
+          <div class="input-row">
+            <span>⏰</span>
+            <input type="time" name="hora" required class="input-medio" maxlength="15">
+          </div>
+        </label>
+      </div>
+      <div class="field-row">
+        <label>Pista (1-7):
+          <div class="input-row">
+            <span>🟩</span>
+            <input type="number" name="pista" min="1" max="7" required class="input-mini" maxlength="3">
+          </div>
+        </label>
+        <label>Jugador 2:
+    <div class="input-row">
+      <span>🎾</span>
+      <input type="text" name="part2" value="[Invitació sense càrrec]" class="input-largo">
+    </div>
+  </label>
+      </div>
+	  <div class="field-row" id="jugadoresExtra">
+  <label>Jugador 3:
+    <div class="input-row">
+      <span>🎾</span>
+      <input type="text" name="part3" value="[Invitació sense càrrec]" class="input-largo">
+    </div>
+  </label>
+  <label>Jugador 4:
+    <div class="input-row">
+      <span>🎾</span>
+      <input type="text" name="part4" value="[14429]" class="input-largo">
+    </div>
+  </label>
+</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Configuración avanzada</legend>
+      <label class="checkbox-label">
+        <input type="checkbox" id="modoEncadenado">
+        Activar misma reserva encadenada
+      </label>
+      <div id="configEncadenado" style="display: none;">
+        <div class="field-row">
+          <label>Repeticiones:
+            <div class="input-row">
+              <span>🔁</span>
+              <input type="number" name="cantidad" min="1" max="10" value="1" class="input-cinco" maxlength="5">
+            </div>
+          </label>
+          <label>Intervalo (sec):
+            <div class="input-row">
+              <span>⏳</span>
+              <input type="number" name="intervalo" min="0" max="300" step="0.5" value="0" class="input-cinco" maxlength="5">
+            </div>
+          </label>
+        </div>
+      </div>
+	  <label class="checkbox-label">
+  <input type="checkbox" id="modoMultipista">
+  Activar reserva por múltiples pistas
+</label>
+<div id="configMultipista" style="display: none;">
+  <div class="field-row">
+    <label>Pistas (ej. 1,2,3):
+      <div class="input-row">
+        <span>🎯</span>
+        <input type="text" name="pistas_multis" class="input-largo" maxlength="20">
+      </div>
+    </label>
+    <label>Intervalo (sec):
+      <div class="input-row">
+        <span>⏳</span>
+        <input type="number" name="intervalo" min="0" max="300" step="0.5" value="0" class="input-cinco">
+      </div>
+    </label>
+  </div>
+</div>
+    </fieldset>
+<div class="button-row">
+  <div id="reloj" class="reloj-lateral">🕒 --:--:--</div>
+  <button type="submit" class="boton-reservar">Reservar</button>
+</div>
+  </form>
+  <p id="status"></p>
+
+<script>
+  // 🔐 Login anticipado
+  document.getElementById('prepararSesion').addEventListener('click', async () => {
+    const form = document.getElementById('reservaForm');
+    const formData = new FormData();
+    formData.set('usuario', form.usuario.value);
+    formData.set('password', form.password.value);
+	
+    const res = await fetch('/prelogin', {
+      method: 'POST',
+      body: formData
+    });
+    const msg = await res.json();
+    document.getElementById('status').innerText = msg.status;
+  });
+
+  // ⏰ Reloj en tiempo real
+  function actualizarReloj() {
+    const ahora = new Date();
+    const hora = ahora.toLocaleTimeString();
+    document.getElementById('reloj').textContent = `${hora}`;
+	document.getElementById('selectorDeporte').dispatchEvent(new Event('change'));
+  }
+  setInterval(actualizarReloj, 1000);
+  actualizarReloj();
+
+  // 🎛 Mostrar configuración encadenada
+  document.getElementById('modoEncadenado').addEventListener('change', function () {
+    document.getElementById('configEncadenado').style.display = this.checked ? 'block' : 'none';
+    if (this.checked) {
+      document.getElementById('modoMultipista').checked = false;
+      document.getElementById('configMultipista').style.display = 'none';
+    }
+  });
+
+  // 🎛 Mostrar configuración multipista
+  document.getElementById('modoMultipista').addEventListener('change', function () {
+    document.getElementById('configMultipista').style.display = this.checked ? 'block' : 'none';
+    if (this.checked) {
+      document.getElementById('modoEncadenado').checked = false;
+      document.getElementById('configEncadenado').style.display = 'none';
+    }
+  });
+
+  // 🚀 Envío del formulario con programación
+  const horaDisparoInput = document.getElementById('horaDisparo');
+  let disparoProgramado = false;
+
+  document.getElementById('reservaForm').addEventListener('submit', async function (e) {
+    const form = this;
+    const status = document.getElementById('status');
+    const submitButton = form.querySelector(".boton-reservar");
+    const horaDisparo = horaDisparoInput.value;
+
+    if (horaDisparo && !disparoProgramado) {
+      e.preventDefault();
+
+      const ahora = new Date();
+      const [h, m] = horaDisparo.split(':');
+      const disparo = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), h, m);
+      const delay = disparo - ahora;
+
+      if (delay > 0) {
+        disparoProgramado = true;
+        status.innerText = `⏳ Reserva programada para las ${horaDisparo}`;
+        submitButton.disabled = true;
+        submitButton.textContent = "⏳ Esperando...";
+        setTimeout(() => {
+          horaDisparoInput.value = "";
+          submitButton.disabled = false;
+          submitButton.textContent = "Reservar";
+          form.dispatchEvent(new Event('submit'));
+        }, delay);
+        return;
+      } else {
+        status.innerText = `⚠️ La hora de disparo ya ha pasado`;
+        return;
+      }
+    }
+
+    // ✅ Envío real
+    e.preventDefault();
+    submitButton.disabled = true;
+    submitButton.textContent = "⏳ ...";
+
+    const rawDate = form.fecha.value;
+    const formattedDate = rawDate.replace(/-/g, '');
+    const rawTime = form.hora.value;
+    const formattedTime = rawTime.replace(/:/g, '');
+
+    const encadenado = document.getElementById('modoEncadenado').checked;
+    const multipista = document.getElementById('modoMultipista').checked;
+    const intervalo = parseFloat(form.intervalo.value || "0");
+
+    const pistasMultis = multipista
+      ? form.pistas_multis.value.split(',').map(p => p.trim()).filter(p => p !== '')
+      : [];
+
+    status.innerText = "";
+
+    if (multipista && pistasMultis.length > 0) {
+      status.innerText = `⏳ Lanzando reservas por pistas: ${pistasMultis.join(', ')}...\n`;
+
+      const promesas = pistasMultis.map(pista => {
+        const formData = new FormData();
+        formData.set('usuario', form.usuario.value);
+        formData.set('password', form.password.value);
+        formData.set('fecha', formattedDate);
+        formData.set('hora', formattedTime);
+        formData.set('pista', pista);
+        formData.set('part2', form.part2.value);
+        formData.set('part3', form.part3.value);
+        formData.set('part4', form.part4.value);
+        formData.set('deporte', form.deporte.value);
+		formData.set('pistas_multis', pistasMultis.join(','));
+        formData.set('intervalo', intervalo);
+		
+        return fetch('/run-script', {
+          method: 'POST',
+          body: formData
+        }).then(res => res.text())
+          .then(msg => `Pista ${pista}: ${msg}`);
+      });
+
+      const resultados = await Promise.all(promesas);
+      status.innerText += resultados.join('\n');
+    } else {
+      const cantidad = encadenado ? parseInt(form.cantidad.value || "1") : 1;
+      status.innerText = `⏳ Lanzando ${cantidad} reserva${cantidad > 1 ? 's' : ''}...\n`;
+
+      for (let i = 1; i <= cantidad; i++) {
+        status.innerText += `⏳ Reserva ${i} de ${cantidad}...\n`;
+
+        const formData = new FormData();
+        formData.set('usuario', form.usuario.value);
+        formData.set('password', form.password.value);
+        formData.set('fecha', formattedDate);
+        formData.set('hora', formattedTime);
+        formData.set('part2', form.part2.value);
+        formData.set('part3', form.part3.value);
+        formData.set('part4', form.part4.value);
+        formData.set('pista', form.pista.value);
+        formData.set('cantidad', 1);
+        formData.set('intervalo', intervalo);
+		formData.set('deporte', form.deporte.value);
+
+        const res = await fetch('/run-script', {
+          method: 'POST',
+          body: formData
+        });
+        const msg = await res.text();
+        status.innerText += `${msg}\n`;
+        if (i < cantidad) await new Promise(r => setTimeout(r, intervalo * 1000));
+      }
+    }
+    submitButton.disabled = false;
+    submitButton.textContent = "Reservar";
+    disparoProgramado = false;
+  });
+document.getElementById('selectorDeporte').addEventListener('change', function () {
+  const esTenis = this.value === 'tenis';
+  document.getElementById('jugadoresExtra').style.display = esTenis ? 'none' : 'flex';
+});
+</script>
+</body>
+</html>
+``
