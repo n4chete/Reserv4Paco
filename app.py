@@ -49,6 +49,7 @@ def prelogin():
 # ✅ Función para ejecutar la reserva en segundo plano
 def ejecutar_reserva_en_segundo_plano(data, session):
     try:
+        print("[RESERVA] Iniciando reserva...", flush=True)
         resultado = hacer_reserva(data, session)
         print(f"[RESERVA] Resultado: {resultado}", flush=True)
     except Exception as e:
