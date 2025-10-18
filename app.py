@@ -46,7 +46,7 @@ def prelogin():
     else:
         return jsonify({"status": "❌ Error de login"})
 
-# ✅ Ruta para lanzar reserva en segundo plano
+# ✅ Función para ejecutar la reserva en segundo plano
 def ejecutar_reserva_en_segundo_plano(data, session):
     try:
         resultado = hacer_reserva(data, session)
@@ -54,6 +54,7 @@ def ejecutar_reserva_en_segundo_plano(data, session):
     except Exception as e:
         print(f"[ERROR] Reserva fallida: {str(e)}", flush=True)
 
+# ✅ Ruta para lanzar la reserva
 @app.route('/run-script', methods=['POST'])
 def run_script():
     global session_guardada
