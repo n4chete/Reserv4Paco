@@ -471,24 +471,6 @@ document.getElementById('selectorDeporte').addEventListener('change', function (
   document.getElementById('jugadoresExtra').style.display = esTenis ? 'none' : 'flex';
 });
 </script>
-<script>
-function probarBackend() {
-  fetch("/ping", { method: "POST" })
-    .then(response => response.text())
-    .then(text => {
-      document.getElementById("ping-status").innerText = text;
-    })
-    .catch(err => {
-      document.getElementById("ping-status").innerText = "❌ Error al conectar";
-    });
-}
-</script>
-
-<div style="text-align:center; margin-top:2rem;">
-  <button onclick="probarBackend()">Probar backend</button>
-  <p id="ping-status" style="font-weight:bold; color:#0077cc;"></p>
-</div>
-
 </body>
 </html>
 ``
