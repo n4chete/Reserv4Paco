@@ -1,0 +1,11 @@
+{
+  "services": {
+    "web": {
+      "resources": {
+        "cpu": 1,
+        "memory": 512
+      },
+      "region": "europe-west4"
+    }
+  }
+}
