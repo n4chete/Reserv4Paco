@@ -1,3 +1,4 @@
+# Añado un comentario
 from flask import Flask, request, render_template, jsonify
 from reserva_core import hacer_reserva
 import time
@@ -96,3 +97,4 @@ def run_script():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
